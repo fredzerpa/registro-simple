@@ -50,18 +50,33 @@ def registrar_usuario():
         print(f"Usuario: {cedula}")
         autentificador = input("Son correctos? (Y/N): ").lower()
         if autentificador == "y":
-            es_valido = True
+            # Buscador de palabras en una lista
+            buscador_de_palabras = lambda palabra, string: True if palabra in string else False
+
+            with open("./registros.txt", mode="r") as archivo:
+                for registro in archivo.readlines():
+                    es_repetido = buscador_de_palabras(nombre, registro)
+                    if es_repetido:
+                        break
+
             with open("./registros.txt", mode="a") as archivo:
-                archivo.write(f"{nombre} || {clave} || {email} || {cedula} \n")
+                if not es_repetido:
+                    es_valido = True
+                    archivo.write(f"{nombre} || {clave} || {email} || {cedula} \n")
+                else:
+                    print("Usuario ya existente, por favor intente con otro nombre")
 
         elif autentificador == "n":
-            salir_registro = input("Desea salir del registro de usuario? (Y/N): ").lower()
-            if salir_registro == "y":
-                nombre = None
-                clave = None
-                email = None
-                cedula = None
-                es_valido = True
+            while not es_valido:
+                salir_registro = input("Desea salir del registro de usuario? (Y/N): ").lower()
+                if salir_registro == "y":
+                    nombre = None
+                    clave = None
+                    email = None
+                    cedula = None
+                    es_valido = True
+                elif salir_registro == "n":
+                    es_valido = True
     return es_valido
 
 def iniciar_sesion():
@@ -73,9 +88,13 @@ def iniciar_sesion():
             if contador >= 3: exit("Muchos intentos fallidos.")
             print("Su Usuario y Clave no Coinciden!")
             print(f"Intento #{contador}: Al tercer intento sera sacado del sistema")
+
         input_usuario = input(" Usuario: ")
         input_clave = input(" Clave: ")
+
+        # Verifica que los datos sean los mismos
         son_iguales = lambda data1, data2: True if data1 == data2 else False
+
         try:
             with open("./registros.txt", mode="r") as archivo:
                 registros_list = archivo.readlines()
@@ -95,9 +114,40 @@ def iniciar_sesion():
 
 
 def volver_al_menu_msg():
-    volver = input("Desea volver al Menu Principal? (Y/N): ").lower()
-    return True if volver == "y" else False
+    while True:
+        volver = input("Desea volver al Menu Principal? (Y/N): ").lower()
+        if volver == "y":
+            return True
+        elif volver == "n":
+            return False
 
+
+def menu_usuario(nombre_usuario):
+    es_valido = False
+    print(f"Bienvenido {nombre_usuario}")
+    while not es_valido:
+        print()
+        print("Por favor escoja una opcion a realizar:")
+        print(" 1. Realizar Operacion Aritmetica.")
+        print(" 2. Desloguearse.")
+        op = int(input("Opcion: "))
+        es_valido = True if (1 <= op <= 2) else False
+    return op
+
+
+def menu_operaciones_aritmeticas():
+    es_valido = False
+    while not es_valido:
+        print()
+        print("Por favor escoja una operacion a realizar:")
+        print(" 1. Suma (a + b)")
+        print(" 2. Resta (a - b)")
+        print(" 3. Multiplicacion (a x b)")
+        print(" 4. Division (a / b)")
+        print(" 5. Volver.")
+        op = int(input("Opcion: "))
+        es_valido = True if (1 <= op <= 5) else False
+    return op
 
 while True:
     volver_al_menu = False
@@ -106,14 +156,49 @@ while True:
         if op_seleccionada == 1: # Inicio Sesion
             print()
             linea_del_usuario = iniciar_sesion()
-            print(linea_del_usuario)
             with open("./registros.txt", mode="r") as archivo:
                 datos_usuario = archivo.readlines()[int(linea_del_usuario) - 1]
                 datos_list_usuario = datos_usuario.split("||")
                 # Usuario(Nombre, Clave, Email, Cedula)
                 nuevo_usuario = Usuario(datos_list_usuario[0].strip(), datos_list_usuario[1].strip(),
                                         datos_list_usuario[2].strip(), datos_list_usuario[3].strip())
-            print()
+            while not volver_al_menu:
+                print()
+                op_usuario = menu_usuario(nuevo_usuario.get_nombre())
+                print()
+                if op_usuario == 1:
+                    operacion_seleccionada = menu_operaciones_aritmeticas()
+                    if 1 <= operacion_seleccionada <= 4:
+                        print("Numeros a calcular: ")
+                        a = int(input(" Primer Numero: "))
+                        b = int(input(" Segundo Numero: "))
+                        if operacion_seleccionada == 1: # Suma
+                            resultado = a + b
+                            tipo_operacion = "Suma"
+                            simbolo = "+"
+                        elif operacion_seleccionada == 2: # Resta
+                            resultado = a - b
+                            tipo_operacion = "Resta"
+                            simbolo = "-"
+                        elif operacion_seleccionada == 3: # Multiplicacion
+                            resultado = a * b
+                            tipo_operacion = "Multiplicacion"
+                            simbolo = "*"
+                        elif operacion_seleccionada == 4: # Division
+                            resultado = a / b
+                            tipo_operacion = "Division"
+                            simbolo = "/"
+                        print()
+                        print(f"Tipo de operacion \"{tipo_operacion}\": \n"
+                              f"Total: {a} {simbolo} {b} = {resultado}")
+
+                        volver_al_menu = volver_al_menu_msg()
+
+                    else:
+                        volver_al_menu = True
+                else:
+                    volver_al_menu = True
+
         elif op_seleccionada == 2: # Registrar Usuario
             print()
             if registrar_usuario(): print("Se ha registrado exitosamente!")
