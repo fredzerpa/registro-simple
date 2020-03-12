@@ -135,6 +135,19 @@ def menu_usuario(nombre_usuario):
     return op
 
 
+def menu_admin(nombre_usuario):
+    es_valido = False
+    print(f"Bienvenido {nombre_usuario}")
+    while not es_valido:
+        print()
+        print("Por favor escoja una opcion a realizar:")
+        print(" 1. Leer datos de usuarios.")
+        print(" 2. Desloguearse.")
+        op = int(input("Opcion: "))
+        es_valido = True if (1 <= op <= 2) else False
+    return op
+
+
 def menu_operaciones_aritmeticas():
     es_valido = False
     while not es_valido:
@@ -149,6 +162,8 @@ def menu_operaciones_aritmeticas():
         es_valido = True if (1 <= op <= 5) else False
     return op
 
+
+
 while True:
     volver_al_menu = False
     op_seleccionada = mostrar_menu()
@@ -162,42 +177,56 @@ while True:
                 # Usuario(Nombre, Clave, Email, Cedula)
                 nuevo_usuario = Usuario(datos_list_usuario[0].strip(), datos_list_usuario[1].strip(),
                                         datos_list_usuario[2].strip(), datos_list_usuario[3].strip())
+                es_admin = True if nuevo_usuario.get_nombre() == "admin" else False
             while not volver_al_menu:
                 print()
-                op_usuario = menu_usuario(nuevo_usuario.get_nombre())
-                print()
-                if op_usuario == 1:
-                    operacion_seleccionada = menu_operaciones_aritmeticas()
-                    if 1 <= operacion_seleccionada <= 4:
-                        print("Numeros a calcular: ")
-                        a = int(input(" Primer Numero: "))
-                        b = int(input(" Segundo Numero: "))
-                        if operacion_seleccionada == 1: # Suma
-                            resultado = a + b
-                            tipo_operacion = "Suma"
-                            simbolo = "+"
-                        elif operacion_seleccionada == 2: # Resta
-                            resultado = a - b
-                            tipo_operacion = "Resta"
-                            simbolo = "-"
-                        elif operacion_seleccionada == 3: # Multiplicacion
-                            resultado = a * b
-                            tipo_operacion = "Multiplicacion"
-                            simbolo = "*"
-                        elif operacion_seleccionada == 4: # Division
-                            resultado = a / b
-                            tipo_operacion = "Division"
-                            simbolo = "/"
-                        print()
-                        print(f"Tipo de operacion \"{tipo_operacion}\": \n"
-                              f"Total: {a} {simbolo} {b} = {resultado}")
+                if not es_admin: # Si es un usuario comun
+                    op_usuario = menu_usuario(nuevo_usuario.get_nombre())
+                    print()
+                    if op_usuario == 1:
+                        operacion_seleccionada = menu_operaciones_aritmeticas()
+                        if 1 <= operacion_seleccionada <= 4:
+                            print("Numeros a calcular: ")
+                            a = int(input(" Primer Numero: "))
+                            b = int(input(" Segundo Numero: "))
+                            if operacion_seleccionada == 1: # Suma
+                                resultado = a + b
+                                tipo_operacion = "Suma"
+                                simbolo = "+"
+                            elif operacion_seleccionada == 2: # Resta
+                                resultado = a - b
+                                tipo_operacion = "Resta"
+                                simbolo = "-"
+                            elif operacion_seleccionada == 3: # Multiplicacion
+                                resultado = a * b
+                                tipo_operacion = "Multiplicacion"
+                                simbolo = "*"
+                            elif operacion_seleccionada == 4: # Division
+                                resultado = a / b
+                                tipo_operacion = "Division"
+                                simbolo = "/"
+                            print()
+                            print(f"Tipo de operacion \"{tipo_operacion}\": \n"
+                                  f"Total: {a} {simbolo} {b} = {resultado}")
 
-                        volver_al_menu = volver_al_menu_msg()
+                            volver_al_menu = volver_al_menu_msg()
 
+                        else:
+                            volver_al_menu = True
                     else:
                         volver_al_menu = True
-                else:
-                    volver_al_menu = True
+
+                else: # Si es administrador
+                    op_admin = menu_admin(nuevo_usuario.get_nombre())
+                    print()
+                    if op_admin == 1:
+                        with open("./registros.txt", mode="r") as archivo:
+                            posicion_linea = 0
+                            for datos_usuario_linea in archivo.readlines():
+                                posicion_linea += 1
+                                print(f"{posicion_linea}. {datos_usuario_linea.replace(' || ', ', ')}")
+                    else:
+                        volver_al_menu = True
 
         elif op_seleccionada == 2: # Registrar Usuario
             print()
