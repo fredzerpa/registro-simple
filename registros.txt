@@ -1,0 +1,4 @@
+admin || 0000 || admin@gmail.com || 24.438.839
+fred || 1234 || fredzerpa@gmail.com || 24.438.839
+fredzerpa || 24438839 || fredzerpa@gmail.com || 24.438.839
+test || 1234 || test@gmail.com || 123456
